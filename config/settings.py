@@ -37,14 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'corsheaders',
 
-    'rest_framework',
-
-    'apps.users',
-    'apps.workspaces',
-    'apps.articles',
-    'apps.approvals',
+    'users',
+    'workspaces',
+    'articles',
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
