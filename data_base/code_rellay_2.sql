@@ -140,29 +140,28 @@ USING GIN (search_vector);
 -- ------------------------------------------------
 
 
--- RANKED SEARCHED QUERRY --
-
-SELECT
-    article_id,
-    version_number,
-    content,
-    ts_rank(search_vector, to_tsquery('payment & bug')) AS rank
-FROM article_versions
-WHERE search_vector @@ to_tsquery('payment & bug')
-ORDER BY rank DESC;
-
+-- RANKED SEARCH QUERY (manual test only) --
+-- SELECT
+--     article_id,
+--     version_number,
+--     content,
+--     ts_rank(search_vector, to_tsquery('payment & bug')) AS rank
+-- FROM article_versions
+-- WHERE search_vector @@ to_tsquery('payment & bug')
+-- ORDER BY rank DESC;
 
 
--- CLEAN ALL TABLE --
-TRUNCATE TABLE
-    article_tags,
-    article_versions,
-    articles,
-    tags,
-    memberships,
-    workspaces,
-    users
-RESTART IDENTITY CASCADE;
+
+-- CLEAN ALL TABLE (manual maintenance only) --
+-- TRUNCATE TABLE
+--     article_tags,
+--     article_versions,
+--     articles,
+--     tags,
+--     memberships,
+--     workspaces,
+--     users
+-- RESTART IDENTITY CASCADE;
 
 
 -- -------------------------
@@ -197,16 +196,6 @@ CREATE TABLE messages (
 --  SEARCHING THE CHAT HISTORY --
 ALTER TABLE messages
 ADD COLUMN search_vector tsvector;
-
-
-CREATE OR REPLACE FUNCTION message_search_vector_update()
-RETURNS trigger AS $$
-BEGIN
-    NEW.search_vector :=
-        to_tsvector('english', COALESCE(NEW.content, ''));
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION message_search_vector_update()
