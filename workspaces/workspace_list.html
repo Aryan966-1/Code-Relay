@@ -1,0 +1,23 @@
+{% for workspace in workspaces %}
+<a href="#" class="workspace-card-link">
+    <div class="workspace-card">
+        <div class="workspace-top">
+            <h3>{{ workspace.name }}</h3>
+            <span class="workspace-badge">12 Articles</span>
+        </div>
+
+        <p>{{ workspace.description }}</p>
+
+        <div class="workspace-footer">
+            <div class="workspace-members">
+                <img src="https://ui-avatars.com/api/?name=A" />
+                <img src="https://ui-avatars.com/api/?name=B" />
+                <img src="https://ui-avatars.com/api/?name=C" />
+            </div>
+            <span class="workspace-date">
+                {{ workspace.created_at|date:"M d, Y" }}
+            </span>
+        </div>
+    </div>
+</a>
+{% endfor %}

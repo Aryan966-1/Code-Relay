@@ -1,0 +1,788 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Create Workspace - KnowledgeHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .create-workspace-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem 0;
+    }
+    
+    .create-workspace-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    
+    .create-workspace-header h1 {
+        font-size: 2.5rem;
+        color: #1a2634;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+    
+    .create-workspace-header h1 i {
+        color: #0D8F81;
+        font-size: 2.5rem;
+    }
+    
+    .create-workspace-header p {
+        color: #666;
+        font-size: 1.1rem;
+    }
+    
+    /* Progress Steps */
+    .progress-steps {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 3rem;
+        position: relative;
+    }
+    
+    .progress-steps::before {
+        content: '';
+        position: absolute;
+        top: 25px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: #e0e0e0;
+        z-index: 1;
+    }
+    
+    .step {
+        position: relative;
+        z-index: 2;
+        background: white;
+        text-align: center;
+        flex: 1;
+    }
+    
+    .step-number {
+        width: 50px;
+        height: 50px;
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.5rem;
+        font-weight: 600;
+        color: #999;
+        transition: all 0.3s ease;
+    }
+    
+    .step.active .step-number {
+        background: #0D8F81;
+        border-color: #0D8F81;
+        color: white;
+    }
+    
+    .step.completed .step-number {
+        background: #0D8F81;
+        border-color: #0D8F81;
+        color: white;
+    }
+    
+    .step.completed .step-number::after {
+        content: '\f00c';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+    }
+    
+    .step-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .step.active .step-label {
+        color: #0D8F81;
+        font-weight: 600;
+    }
+    
+    /* Form Card */
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        animation: slideUp 0.5s ease;
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .form-section {
+        margin-bottom: 2.5rem;
+    }
+    
+    .form-section h2 {
+        font-size: 1.3rem;
+        color: #1a2634;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-section h2 i {
+        color: #0D8F81;
+    }
+    
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group.full-width {
+        grid-column: span 2;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #555;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+    
+    .form-group label i {
+        color: #0D8F81;
+        margin-right: 0.5rem;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        font-family: inherit;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #0D8F81;
+        box-shadow: 0 0 0 4px rgba(13, 143, 129, 0.1);
+    }
+    
+    .form-group input.error,
+    .form-group select.error,
+    .form-group textarea.error {
+        border-color: #ff4444;
+    }
+    
+    .error-message {
+        color: #ff4444;
+        font-size: 0.85rem;
+        margin-top: 0.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    
+    .help-text {
+        color: #999;
+        font-size: 0.85rem;
+        margin-top: 0.3rem;
+    }
+    
+    /* Icon Selector */
+    .icon-selector {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 0.8rem;
+        margin-top: 0.5rem;
+    }
+    
+    .icon-option {
+        aspect-ratio: 1;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: #666;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .icon-option:hover {
+        border-color: #0D8F81;
+        color: #0D8F81;
+        transform: scale(1.05);
+    }
+    
+    .icon-option.selected {
+        background: #0D8F81;
+        border-color: #0D8F81;
+        color: white;
+    }
+    
+    /* Color Selector */
+    .color-selector {
+        display: flex;
+        gap: 0.8rem;
+        margin-top: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .color-option {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    
+    .color-option:hover {
+        transform: scale(1.1);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .color-option.selected {
+        border-color: #333;
+        box-shadow: 0 0 0 2px white, 0 0 0 4px currentColor;
+    }
+    
+    /* Privacy Options */
+    .privacy-options {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+    }
+    
+    .privacy-option {
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .privacy-option:hover {
+        border-color: #0D8F81;
+        transform: translateY(-2px);
+    }
+    
+    .privacy-option.selected {
+        background: #e6f7f4;
+        border-color: #0D8F81;
+    }
+    
+    .privacy-option i {
+        font-size: 2rem;
+        color: #0D8F81;
+        margin-bottom: 0.5rem;
+    }
+    
+    .privacy-option h4 {
+        margin-bottom: 0.3rem;
+        color: #1a2634;
+    }
+    
+    .privacy-option p {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    /* Form Actions */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #eee;
+    }
+    
+    .btn {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary {
+        background: #0D8F81;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #0b7a6e;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(13, 143, 129, 0.3);
+    }
+    
+    .btn-secondary {
+        background: white;
+        color: #333;
+        border: 2px solid #e0e0e0;
+    }
+    
+    .btn-secondary:hover {
+        border-color: #0D8F81;
+        color: #0D8F81;
+        transform: translateY(-2px);
+    }
+    
+    /* Template Preview */
+    .template-preview {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .template-preview h3 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #1a2634;
+        margin-bottom: 1rem;
+    }
+    
+    .preview-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        max-width: 300px;
+    }
+    
+    .preview-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .preview-icon {
+        width: 50px;
+        height: 50px;
+        background: #e6f7f4;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: #0D8F81;
+    }
+    
+    .preview-info h4 {
+        margin-bottom: 0.2rem;
+    }
+    
+    .preview-info span {
+        font-size: 0.8rem;
+        color: #666;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="create-workspace-container">
+    <!-- Header -->
+    <div class="create-workspace-header">
+        <h1>
+            <i class="fas fa-layer-group"></i>
+            Create New Workspace
+        </h1>
+        <p>Organize your team's knowledge in a dedicated space</p>
+    </div>
+    
+    <!-- Progress Steps -->
+    <div class="progress-steps">
+        <div class="step active" id="step1">
+            <div class="step-number">1</div>
+            <div class="step-label">Basic Info</div>
+        </div>
+        <div class="step" id="step2">
+            <div class="step-number">2</div>
+            <div class="step-label">Customize</div>
+        </div>
+        <div class="step" id="step3">
+            <div class="step-number">3</div>
+            <div class="step-label">Team & Privacy</div>
+        </div>
+        <div class="step" id="step4">
+            <div class="step-number">4</div>
+            <div class="step-label">Review</div>
+        </div>
+    </div>
+    
+    <!-- Main Form -->
+    <form method="POST" action="{% url 'create_workspace' %}" id="workspaceForm">
+        {% csrf_token %}
+        
+        <!-- Step 1: Basic Info -->
+        <div class="form-card" id="step1-card">
+            <div class="form-section">
+                <h2><i class="fas fa-info-circle"></i> Basic Information</h2>
+                
+                <div class="form-group">
+                    <label>
+                        <i class="fas fa-tag"></i>
+                        Workspace Name <span style="color: #ff4444;">*</span>
+                    </label>
+                    <input type="text" 
+                           name="name" 
+                           id="workspaceName"
+                           placeholder="e.g., Frontend Team, Marketing, Product Development"
+                           value="{{ form.name.value|default:'Enter your name' }}"
+                           required>
+                    <div class="help-text">Choose a descriptive name for your workspace</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <i class="fas fa-align-left"></i>
+                        Description
+                    </label>
+                    <textarea name="description" 
+                              id="workspaceDescription"
+                              rows="4"
+                              placeholder="What is this workspace about? What kind of knowledge will be stored here?">{{ form.description.value|default:'' }}</textarea>
+                    <div class="help-text">Brief description of the workspace purpose (optional)</div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn btn-primary" onclick="nextStep(1)">
+                    Next: Customize <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Step 2: Customize -->
+        <div class="form-card" id="step2-card" style="display: none;">
+            <div class="form-section">
+                <h2><i class="fas fa-palette"></i> Customize Workspace</h2>
+                
+                <div class="form-group">
+                    <label>
+                        <i class="fas fa-icons"></i>
+                        Choose Icon
+                    </label>
+                    <div class="icon-selector" id="iconSelector">
+                        <div class="icon-option selected" data-icon="folder">📁</div>
+                        <div class="icon-option" data-icon="team">👥</div>
+                        <div class="icon-option" data-icon="project">📊</div>
+                        <div class="icon-option" data-icon="research">🔬</div>
+                        <div class="icon-option" data-icon="design">🎨</div>
+                        <div class="icon-option" data-icon="code">💻</div>
+                        <div class="icon-option" data-icon="marketing">📢</div>
+                        <div class="icon-option" data-icon="finance">💰</div>
+                        <div class="icon-option" data-icon="hr">👔</div>
+                        <div class="icon-option" data-icon="legal">⚖️</div>
+                        <div class="icon-option" data-icon="health">🏥</div>
+                        <div class="icon-option" data-icon="education">🎓</div>
+                    </div>
+                    <input type="hidden" name="icon" id="selectedIcon" value="folder">
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <i class="fas fa-paint-brush"></i>
+                        Accent Color
+                    </label>
+                    <div class="color-selector" id="colorSelector">
+                        <div class="color-option selected" style="background: #0D8F81;" data-color="#0D8F81"></div>
+                        <div class="color-option" style="background: #1976d2;" data-color="#1976d2"></div>
+                        <div class="color-option" style="background: #7b1fa2;" data-color="#7b1fa2"></div>
+                        <div class="color-option" style="background: #c2185b;" data-color="#c2185b"></div>
+                        <div class="color-option" style="background: #e64a19;" data-color="#e64a19"></div>
+                        <div class="color-option" style="background: #fbc02d;" data-color="#fbc02d"></div>
+                        <div class="color-option" style="background: #388e3c;" data-color="#388e3c"></div>
+                        <div class="color-option" style="background: #5d4037;" data-color="#5d4037"></div>
+                    </div>
+                    <input type="hidden" name="color" id="selectedColor" value="#0D8F81">
+                </div>
+            </div>
+            
+            <div class="form-actions" style="justify-content: space-between;">
+                <button type="button" class="btn btn-secondary" onclick="prevStep(2)">
+                    <i class="fas fa-arrow-left"></i> Previous
+                </button>
+                <button type="button" class="btn btn-primary" onclick="nextStep(2)">
+                    Next: Team & Privacy <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Step 3: Team & Privacy -->
+        <div class="form-card" id="step3-card" style="display: none;">
+            <div class="form-section">
+                <h2><i class="fas fa-lock"></i> Privacy Settings</h2>
+                
+                <div class="privacy-options">
+                    <div class="privacy-option selected" onclick="selectPrivacy('private')" id="privacyPrivate">
+                        <i class="fas fa-lock"></i>
+                        <h4>Private</h4>
+                        <p>Only invited members can access</p>
+                    </div>
+                    <div class="privacy-option" onclick="selectPrivacy('team')" id="privacyTeam">
+                        <i class="fas fa-users"></i>
+                        <h4>Team</h4>
+                        <p>All team members can access</p>
+                    </div>
+                    <div class="privacy-option" onclick="selectPrivacy('public')" id="privacyPublic">
+                        <i class="fas fa-globe"></i>
+                        <h4>Public</h4>
+                        <p>Anyone in organization can view</p>
+                    </div>
+                </div>
+                <input type="hidden" name="privacy" id="selectedPrivacy" value="private">
+                
+                <div class="form-group" style="margin-top: 2rem;">
+                    <label>
+                        <i class="fas fa-user-plus"></i>
+                        Invite Team Members (Optional)
+                    </label>
+                    <div class="form-grid">
+                        <input type="email" placeholder="Email address" class="member-email">
+                        <select class="member-role">
+                            <option>Admin</option>
+                            <option>Editor</option>
+                            <option>Viewer</option>
+                        </select>
+                        <button type="button" class="btn btn-secondary" onclick="addMember()">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+                    
+                    <div class="members-list" id="membersList" style="margin-top: 1rem;">
+                        <!-- Added members will appear here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions" style="justify-content: space-between;">
+                <button type="button" class="btn btn-secondary" onclick="prevStep(3)">
+                    <i class="fas fa-arrow-left"></i> Previous
+                </button>
+                <button type="button" class="btn btn-primary" onclick="nextStep(3)">
+                    Next: Review <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Step 4: Review -->
+        <div class="form-card" id="step4-card" style="display: none;">
+            <div class="form-section">
+                <h2><i class="fas fa-check-circle"></i> Review Workspace</h2>
+                
+                <div class="template-preview">
+                    <h3><i class="fas fa-eye"></i> Preview</h3>
+                    <div class="preview-card" id="workspacePreview">
+                        <div class="preview-header">
+                            <div class="preview-icon" id="previewIcon">📁</div>
+                            <div class="preview-info">
+                                <h4 id="previewName">Workspace Name</h4>
+                                <span id="previewPrivacy">Private Workspace</span>
+                            </div>
+                        </div>
+                        <p id="previewDescription">Workspace description will appear here...</p>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" name="agree" required>
+                        I confirm that the information provided is correct
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-actions" style="justify-content: space-between;">
+                <button type="button" class="btn btn-secondary" onclick="prevStep(4)">
+                    <i class="fas fa-arrow-left"></i> Previous
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-check"></i> Create Workspace
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentStep = 1;
+    let invitedMembers = [];
+    
+    // Step navigation
+    function nextStep(step) {
+        if (step === 1) {
+            // Validate step 1
+            const name = document.getElementById('workspaceName').value;
+            if (!name) {
+                alert('Please enter a workspace name');
+                return;
+            }
+        }
+        
+        // Hide current step
+        document.getElementById(`step${step}-card`).style.display = 'none';
+        document.getElementById(`step${step}`).classList.remove('active');
+        document.getElementById(`step${step}`).classList.add('completed');
+        
+        // Show next step
+        const nextStep = step + 1;
+        document.getElementById(`step${nextStep}-card`).style.display = 'block';
+        document.getElementById(`step${nextStep}`).classList.add('active');
+        
+        // Update preview for step 4
+        if (nextStep === 4) {
+            updatePreview();
+        }
+        
+        currentStep = nextStep;
+    }
+    
+    function prevStep(step) {
+        // Hide current step
+        document.getElementById(`step${step}-card`).style.display = 'none';
+        document.getElementById(`step${step}`).classList.remove('active');
+        
+        // Show previous step
+        const prevStep = step - 1;
+        document.getElementById(`step${prevStep}-card`).style.display = 'block';
+        document.getElementById(`step${prevStep}`).classList.remove('completed');
+        document.getElementById(`step${prevStep}`).classList.add('active');
+        
+        currentStep = prevStep;
+    }
+    
+    // Icon selector
+    document.querySelectorAll('.icon-option').forEach(icon => {
+        icon.addEventListener('click', function() {
+            document.querySelectorAll('.icon-option').forEach(i => i.classList.remove('selected'));
+            this.classList.add('selected');
+            document.getElementById('selectedIcon').value = this.dataset.icon;
+            updatePreview();
+        });
+    });
+    
+    // Color selector
+    document.querySelectorAll('.color-option').forEach(color => {
+        color.addEventListener('click', function() {
+            document.querySelectorAll('.color-option').forEach(c => c.classList.remove('selected'));
+            this.classList.add('selected');
+            document.getElementById('selectedColor').value = this.dataset.color;
+        });
+    });
+    
+    // Privacy selector
+    function selectPrivacy(type) {
+        document.querySelectorAll('.privacy-option').forEach(p => p.classList.remove('selected'));
+        document.getElementById(`privacy${type.charAt(0).toUpperCase() + type.slice(1)}`).classList.add('selected');
+        document.getElementById('selectedPrivacy').value = type;
+        updatePreview();
+    }
+    
+    // Add member
+    function addMember() {
+        const email = document.querySelector('.member-email').value;
+        const role = document.querySelector('.member-role').value;
+        
+        if (email && email.includes('@')) {
+            invitedMembers.push({ email, role });
+            
+            const membersList = document.getElementById('membersList');
+            const memberDiv = document.createElement('div');
+            memberDiv.className = 'member-card';
+            memberDiv.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: #f8fafc; border-radius: 8px; margin-bottom: 0.5rem;';
+            memberDiv.innerHTML = `
+                <span><i class="fas fa-envelope"></i> ${email} (${role})</span>
+                <button type="button" class="btn btn-secondary" style="padding: 0.3rem 0.8rem;" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            membersList.appendChild(memberDiv);
+            
+            // Clear input
+            document.querySelector('.member-email').value = '';
+        } else {
+            alert('Please enter a valid email');
+        }
+    }
+    
+    // Update preview
+    function updatePreview() {
+        const name = document.getElementById('workspaceName').value || 'Workspace Name';
+        const description = document.getElementById('workspaceDescription').value || 'Workspace description will appear here...';
+        const icon = document.querySelector('.icon-option.selected').textContent;
+        const privacy = document.getElementById('selectedPrivacy').value;
+        
+        document.getElementById('previewName').textContent = name;
+        document.getElementById('previewDescription').textContent = description;
+        document.getElementById('previewIcon').textContent = icon;
+        
+        let privacyText = 'Private Workspace';
+        if (privacy === 'team') privacyText = 'Team Workspace';
+        if (privacy === 'public') privacyText = 'Public Workspace';
+        document.getElementById('previewPrivacy').textContent = privacyText;
+    }
+    
+    // Real-time preview updates
+    document.getElementById('workspaceName').addEventListener('input', updatePreview);
+    document.getElementById('workspaceDescription').addEventListener('input', updatePreview);
+    
+    // Form submission
+    document.getElementById('workspaceForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Validate all steps
+        const name = document.getElementById('workspaceName').value;
+        if (!name) {
+            alert('Please fill in all required fields');
+            return;
+        }
+        
+        // Show success message
+        alert('Workspace created successfully!');
+        
+        // Submit form (commented for demo)
+        // this.submit();
+        
+        // Redirect to workspace list (commented for demo)
+        // window.location.href = "{% url 'workspace_list' %}";
+    });
+</script>
+{% endblock %}

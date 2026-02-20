@@ -1,0 +1,136 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}KnowledgeHub - Dashboard{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                <span>KnowledgeHub</span>
+            </div>
+
+            <nav class="sidebar-links">
+                <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+
+                <a href="{% url 'workspace_list' %}" class="{% if 'workspace' in request.path %}active{% endif %}">
+                    <i class="fas fa-layer-group"></i> Workspaces  <!-- FIXED: folder → layer-group -->
+                </a>
+
+                <a href="{% url 'article_list' %}" class="{% if 'article' in request.path %}active{% endif %}">
+                    <i class="fas fa-book"></i> Knowledge Base
+                </a>
+
+                <a href="{% url 'pending_approvals' %}" class="{% if 'approval' in request.path %}active{% endif %}">
+                    <i class="fas fa-check-circle"></i> Approvals
+                </a>
+
+                <a href="{% url 'profile' %}" 
+                class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                    <i class="fas fa-user"></i> Profile
+                </a>
+
+                <hr class="sidebar-divider">
+
+                <a href="{% url 'logout' %}" class="logout-link">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Topbar -->
+            <div class="topbar">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" placeholder="Search knowledge base..." id="globalSearch">
+                </div>
+                
+                <div class="topbar-actions">
+                    <div class="notifications">
+                        <i class="far fa-bell"></i>
+                        <span class="badge" id="notificationCount">3</span>
+                    </div>
+                    
+                    <div class="profile-dropdown">
+                        <div class="profile" onclick="toggleProfileMenu()">
+                            <img src="https://ui-avatars.com/api/?name={{ request.user.username }}&background=0D8F81&color=fff" alt="Profile">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        
+                        <div class="dropdown-menu" id="profileMenu">
+                            <a href="{% url 'profile' %}">
+                                <i class="fas fa-user"></i> Profile
+                            </a>
+                            <a href="#">
+                                <i class="fas fa-cog"></i> Settings
+                            </a>
+                            <hr>
+                            <a href="{% url 'logout' %}">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Content -->
+            <div class="content-area">
+                {% block content %}
+                <!-- Child template content goes here -->
+                {% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{% static 'js/main.js' %}"></script>
+    
+    <script>
+        // Toggle profile dropdown
+        function toggleProfileMenu() {
+            document.getElementById('profileMenu').classList.toggle('show');
+        }
+        
+        // Close dropdown when clicking outside
+        window.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('profileMenu');
+    const profileBtn = document.querySelector('.profile');
+
+    if (!profileBtn.contains(event.target) &&
+        !dropdown.contains(event.target)) {
+        dropdown.classList.remove('show');
+    }
+});
+        
+        // Global search functionality
+        document.getElementById('globalSearch')?.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                const query = this.value;
+                if (query.length > 2) {
+                    window.location.href = "{% url 'search' %}?q=" + encodeURIComponent(query);
+                }
+            }
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
