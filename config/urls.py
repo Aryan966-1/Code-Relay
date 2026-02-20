@@ -1,35 +1,39 @@
-"""
-URL configuration for config project.
+"""URL configuration for config project."""
+from importlib import import_module
 
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
-from django.urls import path,include 
-from django.http import HttpResponse
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+from django.http import JsonResponse
+from django.urls import include, path
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
+
+def _missing_app_view(_request, *args, **kwargs):
+    return JsonResponse(
+        {
+            "detail": "Requested module is unavailable in this prototype snapshot.",
+            "status": "service_unavailable",
+        },
+        status=503,
+    )
+
+
+def _safe_include(module_path):
+    try:
+        import_module(module_path)
+        return include(module_path)
+    except ModuleNotFoundError:
+        fallback_patterns = [path('', _missing_app_view, name='module_unavailable')]
+        return include((fallback_patterns, 'fallback'))
+
+
 urlpatterns = [
-    path('', lambda request: HttpResponse("Knowledge Platform API 🚀")),
+    path('', lambda request: JsonResponse({"message": "Knowledge Platform API 🚀"})),
     path('admin/', admin.site.urls),
-    path('api/users/', include('apps.users.urls')),
-    path('api/workspaces/', include('apps.workspaces.urls')),
-    path('api/articles/', include('apps.articles.urls')),
-    path('api/approvals/', include('apps.approvals.urls')),
+    path('api/users/', _safe_include('apps.users.urls')),
+    path('api/workspaces/', _safe_include('apps.workspaces.urls')),
+    path('api/articles/', _safe_include('apps.articles.urls')),
+    path('api/approvals/', _safe_include('apps.approvals.urls')),
     path('api/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path("users/", include("apps.users.urls")),
-    
+    path('users/', _safe_include('apps.users.urls')),
 ]
